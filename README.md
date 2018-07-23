@@ -1,4 +1,6 @@
-# Python class to read multiple SLHA files using PySLHA, and to test them based on the experimental results
+# Python class to read multiple SLHA files using PySLHA
+# and testing them based on the experimental results
+
 Python Class -> classReadSLHA.py
 
 An example script which uses classReadSLHA.py -> readSLHA.py
