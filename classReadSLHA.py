@@ -252,7 +252,7 @@ class ReadSLHAfiles():
 
         if (self.hh_1 > 122. and self.hh_1 < 128.) or (self.hh_2 > 122. and self.hh_2 < 128.) : self.HiggsMassBound = True
         if self.Glu   > 1800.                                                                 : self.GluinoBound    = True
-        if self.Cha_1 > 103.5                                                                 : self.Cha_1_Bound    = True
+        if self.Cha_1 > 103.5 and self.Cha_1 < 275.                                           : self.Cha_1_Bound    = True
         if self.Se_1  > 105.                                                                  : self.Se_1_Bound     = True
         if self.VZR   > 3500.                                                                 : self.ZprimeBound    = True
 
@@ -301,7 +301,7 @@ class ReadSLHAfiles():
     def Check_RelicDensityBound(self):
         self.RelicDenBound = False
         
-        if self.RelicDensity >= 0.0913 and self.RelicDensity <= 0.1363: self.RelicDenBound = True
+        if self.RelicDensity >= 0.0913 and self.RelicDensity <= 0.1363 : self.RelicDenBound = True
         
         return self.RelicDenBound
 
@@ -316,4 +316,10 @@ class ReadSLHAfiles():
 
 
 
+########################################################################
 
+    def FindBenchmarks(self, pathtodatafile, SLHAnumber):
+        self.file = open(pathtodatafile, 'a+')
+        self.file.write("stem."+str(SLHAnumber)+"\n")
+        self.file.close()
+        
