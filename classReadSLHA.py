@@ -221,47 +221,99 @@ class ReadSLHAfiles():
 
 
 #########################################################################
+######################### Let's check the LSP ###########################
+
+    def Check_LSP(self):
+        self.NeutralinoLSPbound = False
+        self.SneutrinoLSPbound  = False
+        self.LSPbound           = False
+
+        if self.LSP == 1000022                : self.LSPcontent = "NeutralinoLSP"
+        if self.LSP == 1000012                : self.LSPcontent = "SneutrinoLSP"
+
+        if self.LSPcontent == "NeutralinoLSP" : self.NeutralinoLSPbound = True
+        if self.LSPcontent == "SneutrinoLSP"  : self.SneutrinoLSPbound  = True
+
+        self.LSPbound = self.NeutralinoLSPbound or self.SneutrinoLSPbound
+
+        return self.LSPbound
+
+#########################################################################
 ################ Ready to Check Experimental Bounds #####################
 
 ################ Let's check SUSY mass bounds ###########################
     def Check_MassBounds(self):
-        if self.Cha_1 > 200: self.Cha_1_Bound = True
+        self.HiggsMassBound = False
+        self.GluinoBound    = False
+        self.ZprimeBound    = False
+        self.Cha_1_Bound    = False
+        self.Se_1_Bound     = False
 
-        self.MassBounds = self.Cha_1_Bound
+
+        if (self.hh_1 > 122. and self.hh_1 < 128.) or (self.hh_2 > 122. and self.hh_2 < 128.) : self.HiggsMassBound = True
+        if self.Glu   > 1800.                                                                 : self.GluinoBound    = True
+        if self.Cha_1 > 103.5                                                                 : self.Cha_1_Bound    = True
+        if self.Se_1  > 105.                                                                  : self.Se_1_Bound     = True
+        if self.VZR   > 3500.                                                                 : self.ZprimeBound    = True
 
 
+        if 99 not in self.SLHA.blocks["MASS"].keys():   # For MSSM kind of SUSY models which does not have Z' in their particle content
+            self.MassBounds = self.HiggsMassBound and self.GluinoBound and self.Cha_1_Bound and self.Se_1_Bound
+        if 99 in self.SLHA.blocks["MASS"].keys():       # For Extended SUSY Models which have Z' in their particle content
+            self.MassBounds = self.HiggsMassBound and self.GluinoBound and self.Cha_1_Bound and self.Se_1_Bound and self.ZprimeBound
+        
+        return self.MassBounds
+
+########################################################################
 ######## Let's check HiggsBounds and HiggsSignals Results ###############
+        
+    def Check_HiggsBounds_Signals(self):
+        self.HiggsBounds   = False
+        self.HiggsSignals  = False
 
+        if self.HBresult == 1                                     : self.HiggsBounds  = True                               
+        if self.totchi2  < 3                                      : self.HiggsSignals = True
 
+        self.Combined_HiggsBounds_Signals = self.HiggsBounds and self.HiggsSignals
 
-
-
-
-
-
+        return self.Combined_HiggsBounds_Signals
 
 ########################################################################
 ############### Let's check B-physics constraints ######################
 
     def Check_Bphysics(self):
         self.BxsgammaBound = False
-        self.RBtaunuBound = False
-        self.BsmumuBound = False
-        self.BphysicsBound = False
+        self.RBtaunuBound  = False
+        self.BsmumuBound   = False
+        self.BphysicsBounds = False
 
-        if self.Bxsgamma > 2.44e-4 and self.Bxsgamma < 3.87e-4    : self.BxsgammaBound = True
+        if self.Bxsgamma > 2.99e-4 and self.Bxsgamma < 3.87e-4    : self.BxsgammaBound = True
         if self.RBtaunu > 0.15 and self.RBtaunu < 2.41            : self.RBtaunuBound = True
         if self.Bsmumu > 0.8e-9 and self.Bsmumu < 6.2e-9          : self.BsmumuBound = True
 
-        self.BphysicsBound = self.BxsgammaBound and self.RBtaunuBound and self.BsmumuBound
+        self.BphysicsBounds = self.BxsgammaBound and self.RBtaunuBound and self.BsmumuBound
+    
+        return self.BphysicsBounds
 
 ########################################################################
-############# Let's Check Dark Matter Experiments ######################
+################## Let's Check Relic Density ###########################
 
-    def Check_DMexpBounds(self):
+    def Check_RelicDensityBound(self):
         self.RelicDenBound = False
-
-        if self.RelicDensity >= 0.09 and self.RelicDensity <= 0.14: self.RelicDenBound = True
         
+        if self.RelicDensity >= 0.0913 and self.RelicDensity <= 0.1363: self.RelicDenBound = True
+        
+        return self.RelicDenBound
+
 ########################################################################
+############# Let's Check Other Dark Matter Experiments ################
+
+    def Check_DMexperiments(self):
+        pass
+# Check Spin Independent Cross Section for Proton and Neutron
+# Check Annihilation Cross Section
+
+
+
+
 
