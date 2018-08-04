@@ -6,6 +6,7 @@
 # ----------------------------------------------------------------------
 
 import pyslha
+import pandas as pd
 
 class ReadSLHAfiles():
     def __init__(self):
@@ -71,19 +72,36 @@ class ReadSLHAfiles():
         self.Yv32SUSY        = self.SLHA.blocks["YV"][3,2]        
         self.Yv33SUSY        = self.SLHA.blocks["YV"][3,3]
 
-        self.MuRGUT          = self.SLHA.blocks["HMIXGUT"][9]
-        self.MuGUT           = self.SLHA.blocks["HMIXGUT"][1]
-        self.BMuRGUT         = self.SLHA.blocks["HMIXGUT"][109]
-        self.BmuGUT          = self.SLHA.blocks["HMIXGUT"][101]
+        if 'HMIXGUT' in self.SLHA.blocks.keys():
+            self.MuRGUT          = self.SLHA.blocks["HMIXGUT"][9]
+            self.MuGUT           = self.SLHA.blocks["HMIXGUT"][1]
+            self.BMuRGUT         = self.SLHA.blocks["HMIXGUT"][109]
+            self.BmuGUT          = self.SLHA.blocks["HMIXGUT"][101]
+        else:
+            self.MuRGUT          = 1e40
+            self.MuGUT           = 1e40
+            self.BMuRGUT         = 1e40
+            self.BmuGUT          = 1e40
 
-        self.mHd2GUT         = self.SLHA.blocks["MSOFTGUT"][21]
-        self.mHu2GUT         = self.SLHA.blocks["MSOFTGUT"][22]
-        self.mCR2GUT         = self.SLHA.blocks["MSOFTGUT"][31]
-        self.mCRb2GUT        = self.SLHA.blocks["MSOFTGUT"][32]
-        self.M1GUT           = self.SLHA.blocks["MSOFTGUT"][1]
-        self.M2GUT           = self.SLHA.blocks["MSOFTGUT"][2]
-        self.M3GUT           = self.SLHA.blocks["MSOFTGUT"][3]
-        self.M4GUT           = self.SLHA.blocks["MSOFTGUT"][4]
+        if 'MSOFTGUT' in self.SLHA.blocks.keys():
+            self.mHd2GUT         = self.SLHA.blocks["MSOFTGUT"][21]
+            self.mHu2GUT         = self.SLHA.blocks["MSOFTGUT"][22]
+            self.mCR2GUT         = self.SLHA.blocks["MSOFTGUT"][31]
+            self.mCRb2GUT        = self.SLHA.blocks["MSOFTGUT"][32]
+            self.M1GUT           = self.SLHA.blocks["MSOFTGUT"][1]
+            self.M2GUT           = self.SLHA.blocks["MSOFTGUT"][2]
+            self.M3GUT           = self.SLHA.blocks["MSOFTGUT"][3]
+            self.M4GUT           = self.SLHA.blocks["MSOFTGUT"][4]
+        else:
+            self.mHd2GUT         = 1e40
+            self.mHu2GUT         = 1e40
+            self.mCR2GUT         = 1e40
+            self.mCRb2GUT        = 1e40
+            self.M1GUT           = 1e40
+            self.M2GUT           = 1e40
+            self.M3GUT           = 1e40
+            self.M4GUT           = 1e40             
+
 
         self.Sd_1            = self.SLHA.blocks["MASS"][1000001]
         self.Sd_2            = self.SLHA.blocks["MASS"][1000003]
@@ -179,12 +197,16 @@ class ReadSLHAfiles():
 
         if 'HIGGSBOUNDSRESULTS' in self.SLHA.blocks.keys():
             self.HBresult         = self.SLHA.blocks["HIGGSBOUNDSRESULTS"][1,2]   # HBresult
+        else:
+            self.HBresult         = 1e40
 
 #########################################################################
 # If BLOCK HiggsSignalsResults is added by HiggsSignals
 
         if 'HIGGSSIGNALSRESULTS' in self.SLHA.blocks.keys():
             self.totchi2          = self.SLHA.blocks["HIGGSSIGNALSRESULTS"][12]   # chi^2 (total)
+        else:
+            self.totchi2          = 1e40
 
 #########################################################################
 # If BLOCK RELIC is added by MicrOmegas
@@ -200,7 +222,17 @@ class ReadSLHAfiles():
             self.AntiProtonFlux   = self.SLHA.blocks["RELIC"][309]   # Antiproton flux [cm^2 sr s GeV]^{-1}
             self.NeutrinoFlux     = self.SLHA.blocks["RELIC"][310]   # Neutrino Flux [1/Year/km^2]
             self.AntiNeutrinoFlux = self.SLHA.blocks["RELIC"][311]   # Anti-Neutrino Flux [1/Year/km^2]
-    
+        else:
+            self.RelicDensity     = 1e40
+            self.ProtonSI         = 1e40
+            self.NeutronSI        = 1e40
+            self.IceCubeExcCL     = 1e40
+            self.sigmaV           = 1e40
+            self.PhotonFlux       = 1e40
+            self.PositronFlux     = 1e40
+            self.AntiProtonFlux   = 1e40
+            self.NeutrinoFlux     = 1e40
+            self.AntiNeutrinoFlux = 1e40
 
 #########################################################################
 ######################## Reading Decay Blocks ###########################
@@ -224,17 +256,21 @@ class ReadSLHAfiles():
 ######################### Let's check the LSP ###########################
 
     def Check_LSP(self):
-        self.NeutralinoLSPbound = False
-        self.SneutrinoLSPbound  = False
         self.LSPbound           = False
 
-        if self.LSP == 1000022                : self.LSPcontent = "NeutralinoLSP"
-        if self.LSP == 1000012                : self.LSPcontent = "SneutrinoLSP"
+        if self.LSP   == 1000022                : self.LSPcontent = "NeutralinoLSP"
+        elif self.LSP == 1000012                : self.LSPcontent = "SneutrinoLSP"
+        else                                    : self.LSPcontent = "UnknownLSP"
 
-        if self.LSPcontent == "NeutralinoLSP" : self.NeutralinoLSPbound = True
-        if self.LSPcontent == "SneutrinoLSP"  : self.SneutrinoLSPbound  = True
-
-        self.LSPbound = self.NeutralinoLSPbound or self.SneutrinoLSPbound
+        if self.LSPcontent == "NeutralinoLSP" :
+            self.LSPbound           = True
+            self.LSPmass            = self.Chi_1
+        elif self.LSPcontent == "SneutrinoLSP"  : 
+            self.LSPbound           = True
+            self.LSPmass            = self.Sv_1
+        else:
+            self.LSPbound           = False
+            self.LSPmass            = 1e40
 
         return self.LSPbound
 
@@ -252,7 +288,7 @@ class ReadSLHAfiles():
 
         if (self.hh_1 > 122. and self.hh_1 < 128.) or (self.hh_2 > 122. and self.hh_2 < 128.) : self.HiggsMassBound = True
         if self.Glu   > 1800.                                                                 : self.GluinoBound    = True
-        if self.Cha_1 > 103.5 and self.Cha_1 < 275.                                           : self.Cha_1_Bound    = True
+        if self.Cha_1 > 103.5 and self.Cha_1 < 500.                                           : self.Cha_1_Bound    = True
         if self.Se_1  > 105.                                                                  : self.Se_1_Bound     = True
         if self.VZR   > 3500.                                                                 : self.ZprimeBound    = True
 
@@ -308,12 +344,35 @@ class ReadSLHAfiles():
 ########################################################################
 ############# Let's Check Other Dark Matter Experiments ################
 
-    def Check_DMexperiments(self):
-        pass
-# Check Spin Independent Cross Section for Proton and Neutron
-# Check Annihilation Cross Section
+    def Closest(self, list, Number):
+        aux = []
+        for valor in list:
+            aux.append(abs(Number-valor))
+        return aux.index(min(aux))
+
+    def Convertcm2topb(self, xsectioncm2):
+        xsectionpb = xsectioncm2*1e36
+        return xsectionpb
 
 
+    def LoadExpData(self, ExperimentName, ExpDatapath):
+        if ExperimentName == "XENON1T":
+            self.XENON1Tdata = pd.read_csv(ExpDatapath, sep=",", header=None, names= ["XENON1TWIMPMASS","XENON1TXSECTION"])
+            self.XENON1Tdata["XENON1TXSECTION"] = self.Convertcm2topb(self.XENON1Tdata["XENON1TXSECTION"])
+        else:
+            pass
+
+    def SpinIndxSectionSignalStrength(self):     
+        self.SpinIndxSectionBound = False
+
+        self.nearestXENON1Txsection = self.XENON1Tdata["XENON1TXSECTION"][self.Closest(self.XENON1Tdata["XENON1TWIMPMASS"],self.LSPmass)]
+        self.Xenon1TProtonSIstrength = self.ProtonSI/self.nearestXENON1Txsection
+        self.Xenon1TNeutronSIstrength = self.NeutronSI/self.nearestXENON1Txsection
+
+        if self.Xenon1TProtonSIstrength <= 1. or self.Xenon1TNeutronSIstrength <= 1.:
+            self.SpinIndxSectionBound = True
+
+        return self.SpinIndxSectionBound
 
 
 ########################################################################
